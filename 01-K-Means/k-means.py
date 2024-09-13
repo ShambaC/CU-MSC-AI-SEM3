@@ -25,12 +25,12 @@ def euclid_distance(pointA, pointB, size: int = 2) -> float :
     return distance
 
 
-
 if __name__ == "__main__" :
     k = int(input("Enter the number of clusters: "))
 
     import pathlib
     import pandas as pd
+    import numpy as np
 
     DATASET_URI = f"{pathlib.Path().resolve()}\\..\\Dataset\\IRIS\\iris.data"
     DATASET_HEADERS = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'type']
@@ -43,3 +43,17 @@ if __name__ == "__main__" :
 
     import random
     cluster_indices = random.sample(range(data_amount), k)
+    cluster_rows = [dataFrame.loc[x] for x in cluster_indices]
+    cluster_dict = dict.fromkeys(cluster_rows, [])
+
+    for index, row in dataFrame.iterrows() :
+        cluster_distance = np.array([
+            euclid_distance(
+                [row['sepal_length'], row['sepal_width'], row['petal_length'], row['petal_width']],
+                [cluster['sepal_length'], cluster['sepal_width'], cluster['petal_length'], cluster['petal_width']],
+                4)
+                for cluster in cluster_rows
+            ])
+        
+        chosen_cluster = cluster_rows[np.argmin(cluster_distance)]
+        cluster_dict[chosen_cluster].append(row)
