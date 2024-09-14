@@ -84,9 +84,14 @@ if __name__ == "__main__" :
             cluster_dict0 = cluster_dict
             cluster_dict.clear()
 
-
-
             for cluster in cluster_rows:
+                print(cluster)
+                cluster[DATASET_HEADERS[0]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[0]]
+                cluster[DATASET_HEADERS[1]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[1]]
+                cluster[DATASET_HEADERS[2]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[2]]
+                cluster[DATASET_HEADERS[3]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[3]]
+                print(cluster)
+
                 cluster_dict[cluster.name] = []
 
 
