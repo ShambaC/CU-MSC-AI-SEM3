@@ -77,7 +77,15 @@ if __name__ == "__main__" :
             data = pd.DataFrame(value)
             cluster_dict_df[key] = data
 
-        if cluster_dict == cluster_dict0 :
+        flag = True
+        if len(cluster_dict0.items()) > 0 :
+            for (k, v), (k2, v2) in zip(cluster_dict.items(), cluster_dict0.items()) :
+                if v != v2 :
+                    flag = False
+        else :
+            flag = False
+
+        if flag :
             print(f"Iterations: {i}")
             break
         else :
@@ -85,12 +93,10 @@ if __name__ == "__main__" :
             cluster_dict.clear()
 
             for cluster in cluster_rows:
-                print(cluster)
                 cluster[DATASET_HEADERS[0]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[0]]
                 cluster[DATASET_HEADERS[1]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[1]]
                 cluster[DATASET_HEADERS[2]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[2]]
                 cluster[DATASET_HEADERS[3]] = cluster_dict_df[cluster.name].mean(numeric_only=True)[DATASET_HEADERS[3]]
-                print(cluster)
 
                 cluster_dict[cluster.name] = []
 
