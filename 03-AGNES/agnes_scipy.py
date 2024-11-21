@@ -48,7 +48,7 @@ def main(linkage : str) :
     model = model.fit(dataset_np)
 
     plt.title("AGNES")
-    plot_dendrogram(model, truncate_mode="level", p=3)
+    plot_dendrogram(model)
     plt.xlabel("Number of points or index")
     plt.show()
 
