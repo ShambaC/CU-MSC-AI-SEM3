@@ -158,9 +158,11 @@ if __name__ == "__main__" :
         for i in trange(len(cluster_list)) :
             for j in range(i + 1, len(cluster_list)) :
                 filtered_index = i * len(cluster_list) + j
+                
                 # distance_row = distance_cluster(cluster_matrix[filtered_index][0], cluster_matrix[filtered_index][1], 'single')
-                distance_row = distance_cluster(cluster_matrix[filtered_index][0], cluster_matrix[filtered_index][1], 'average')
-                # distance_row = distance_cluster(cluster_matrix[filtered_index][0], cluster_matrix[filtered_index][1], 'complete')
+                # distance_row = distance_cluster(cluster_matrix[filtered_index][0], cluster_matrix[filtered_index][1], 'average')
+                distance_row = distance_cluster(cluster_matrix[filtered_index][0], cluster_matrix[filtered_index][1], 'complete')
+
                 distance_matrix.append(distance_row)
         
         distance_matrix_np = np.array(distance_matrix)
