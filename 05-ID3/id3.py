@@ -87,7 +87,7 @@ def make_id3(df: pd.DataFrame, label: str, class_list: Union[set, list]) -> dict
 @click.option('--label', '-L', help='The output feature label of the dataset')
 def main(file, label) :
     data = pd.read_csv(file)
-    class_list = set(data[label].to_list())
+    class_list = data[label].unique().tolist()
 
     tree = make_id3(data, label, class_list)
 
