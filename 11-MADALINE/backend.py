@@ -40,10 +40,10 @@ class MADALINE :
         fitting = True
 
         while current_epoch - 1 < epochs and fitting :
+            current_epoch += 1
             with tqdm(total=data_count) as pbar :
 
                 def row_iter(x : np.ndarray) :
-                    current_epoch += 1
 
                     for i in range(self.num_layers) :
                         if i == 0 :
