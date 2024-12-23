@@ -12,13 +12,13 @@ class Perceptron() :
     """Perceptron class"""
     def __init__(self, num_inputs: int, weights: np.ndarray=None):
         self.num_inputs = num_inputs
-        if weights == None :
-            self.weights = np.random.uniform(-0.5, 0.5, self.num_inputs+1)
-        else :
+        if weights is not None :
             if len(weights) != num_inputs + 1 :
                 self.weights = np.random.uniform(-0.5, 0.5, self.num_inputs+1)
             else :
                 self.weights = weights.ravel()
+        else :
+            self.weights = np.random.uniform(-0.5, 0.5, self.num_inputs+1)
 
 
     def fit(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, np.ndarray], epochs: int=20, lr: float=2e-2, thresh: float=1) -> None :
@@ -64,7 +64,7 @@ class Perceptron() :
                 raise ValueError("Object type data in dataset. Please only use numerical data.")
 
 
-        is_fitting = False
+        is_fitting = True
         epoch_ctr = 0
 
         self.thresh = thresh
@@ -76,7 +76,7 @@ class Perceptron() :
                 has_error = []
 
                 def row_iter(x: np.ndarray, idx: int) :
-                    res_bool = False
+                    res_bool = True
 
                     a = np.insert(x, 0, 1)
                     y_in = np.sum(np.multiply(a, self.weights))
@@ -87,8 +87,8 @@ class Perceptron() :
                     elif y_in < -thresh : y_out = -1
 
                     if y_out != y[idx] :
-                        self.weights = np.add(self.weights, np.multiply(x, (lr * y[idx])))
-                        res_bool = True
+                        self.weights = np.add(self.weights, np.multiply(a, (lr * y[idx])))
+                        res_bool = False
 
                     pbar.set_description(f'Epoch {epoch_ctr} ')
                     pbar.set_postfix_str("")
@@ -102,19 +102,34 @@ class Perceptron() :
                 
                 if all(has_error) :
                     is_fitting = False
-                    print("Perceptron fitted, stopping training!")
+                    print("\nPerceptron fitted, stopping training!")
                     return
                 
         print("Max number of epochs reached. Stopping training!")
         return
         
 
-    def predict(self, X: Union[pd.DataFrame, pd.Series, np.ndarray]) -> float :
+    def predict(self, X: Union[pd.DataFrame, pd.Series, np.ndarray]) -> int :
         """Method to predict test data"""
-        ...
+        if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series) :
+            X = X.to_numpy()
+
+        a = np.insert(X, 0, 1)
+        y_in = np.sum(np.multiply(a, self.weights))
+
+        y_out = 0
+        if y_in > self.thresh : y_out = 1
+        elif y_in >= -self.thresh and y_in <= self.thresh : y_out = 0
+        elif y_in < -self.thresh : y_out = -1
+
+        return y_out
+
 
     def evaluate(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, np.ndarray]) -> None :
-        ...
+        if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series) :
+            X = X.to_numpy()
+        if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series) :
+            X = X.to_numpy()
 
     def __call__(self, X: Union[pd.DataFrame, np.ndarray], *args, **kwds):
         return self.predict(X)
