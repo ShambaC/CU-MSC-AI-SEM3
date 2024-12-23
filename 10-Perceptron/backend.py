@@ -126,10 +126,33 @@ class Perceptron() :
 
 
     def evaluate(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, np.ndarray]) -> None :
-        if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series) :
+        if isinstance(X, pd.DataFrame) :
             X = X.to_numpy()
-        if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series) :
-            X = X.to_numpy()
+        if isinstance(y, pd.DataFrame) :
+            y = y.to_numpy()
+
+        def row_iter(x: np.ndarray) :
+            a = np.insert(x, 0, 1)
+            y_in = np.sum(np.multiply(a, self.weights))
+
+            y_out = 0
+            if y_in > self.thresh : y_out = 1
+            elif y_in >= -self.thresh and y_in <= self.thresh : y_out = 0
+            elif y_in < -self.thresh : y_out = -1
+
+            return y_out
+        
+        res = []
+        for i in X :
+            res.append(row_iter(i))
+
+        total_data = X.shape[0]
+        correct_data = 0
+        for i, j in zip(res, y) :
+            if i == j :
+                correct_data += 1
+        
+        print(f"Accuracy: {(correct_data / total_data) * 100.0}%")
 
     def __call__(self, X: Union[pd.DataFrame, np.ndarray], *args, **kwds):
         return self.predict(X)
