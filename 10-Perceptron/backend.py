@@ -107,7 +107,9 @@ class Perceptron() :
                 
         print("Max number of epochs reached. Stopping training!")
         return
-        
+
+    def seed(self, seed: int) :
+        np.random.seed(seed)  
 
     def predict(self, X: Union[pd.DataFrame, pd.Series, np.ndarray]) -> int :
         """Method to predict test data"""
@@ -139,7 +141,10 @@ class Perceptron() :
             if i == j :
                 correct_data += 1
         
-        print(f"Accuracy: {(correct_data / total_data) * 100.0}%")
+        acc = (correct_data / total_data) * 100.0
+        
+        print(f"Accuracy: {acc}%")
+        return acc
 
     def __call__(self, X: Union[pd.DataFrame, np.ndarray], *args, **kwds):
         return self.predict(X)

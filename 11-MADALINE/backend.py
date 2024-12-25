@@ -41,6 +41,9 @@ class MADALINE :
         
         # TODO: implement parameter calculation
 
+    def seed(self, seed: int) :
+        np.random.seed(seed)
+
     def fit(self, x_data : Union[pd.DataFrame, np.ndarray], y_data : Union[pd.DataFrame, np.ndarray], epochs : int, lr: int) :
         """
         Method to fit data to the network
@@ -175,8 +178,11 @@ class MADALINE :
         for i, j in zip(res, y) :
             if i == j :
                 correct_data += 1
+
+        acc = (correct_data / total_data) * 100.0
         
-        print(f"Accuracy: {(correct_data / total_data) * 100.0}%")
+        print(f"Accuracy: {acc}%")
+        return acc
 
 
 def create_madaline(topology : str) :
