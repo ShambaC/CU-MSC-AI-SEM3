@@ -13,19 +13,18 @@ X = pd.read_csv('3_NOR.csv')
 
 y = X.pop('output')
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-MADALINE = create_madaline("3-2-1", 42)
+MADALINE = create_madaline("3-2-1", 69)
 
-MADALINE.fit(X_train, y_train, 13, 1.0077385260894547)
+MADALINE.fit(X_train, y_train, 64, 1.0992678972070067)
 MADALINE.evaluate(X_test, y_test)
 
 # def objective(trial) :
 #     epochs = trial.suggest_int('epochs', 10, 100)
 #     lr = trial.suggest_float('lr', 0.1, 1.1)
 
-#     MADALINE = create_madaline("3-2-1")
-#     MADALINE.seed(42)
+#     MADALINE = create_madaline("3-2-1", 69)
 
 #     MADALINE.fit(X_train, y_train, epochs, lr)
 #     return MADALINE.evaluate(X_test, y_test)
