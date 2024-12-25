@@ -71,9 +71,9 @@ class Perceptron() :
 
         while epoch_ctr < epochs and is_fitting :
             epoch_ctr += 1
-            with tqdm(total=X.shape[0]) as pbar :
+            with tqdm(total=X.shape[0], ascii=' ⚊⚊', colour="#5eff8a") as pbar :
 
-                has_error = []
+                has_passed = []
 
                 def row_iter(x: np.ndarray, idx: int) :
                     res_bool = True
@@ -98,9 +98,9 @@ class Perceptron() :
 
                 for idx, row_x in enumerate(X) :
                     res = row_iter(row_x, idx)
-                    has_error.append(res)
+                    has_passed.append(res)
                 
-                if all(has_error) :
+                if all(has_passed) :
                     is_fitting = False
                     print("\nPerceptron fitted, stopping training!")
                     return
@@ -130,21 +130,8 @@ class Perceptron() :
             X = X.to_numpy()
         if isinstance(y, pd.DataFrame) :
             y = y.to_numpy()
-
-        def row_iter(x: np.ndarray) :
-            a = np.insert(x, 0, 1)
-            y_in = np.sum(np.multiply(a, self.weights))
-
-            y_out = 0
-            if y_in > self.thresh : y_out = 1
-            elif y_in >= -self.thresh and y_in <= self.thresh : y_out = 0
-            elif y_in < -self.thresh : y_out = -1
-
-            return y_out
         
-        res = []
-        for i in X :
-            res.append(row_iter(i))
+        res = [self.predict(x) for x in X]
 
         total_data = X.shape[0]
         correct_data = 0
