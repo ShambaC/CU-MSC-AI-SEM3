@@ -9,7 +9,9 @@ from tqdm import tqdm
 from typing import Union
 
 class MADALINE :
-    def __init__(self, num_layers : int, layer_data : list) -> None:
+    def __init__(self, num_layers : int, layer_data : list, seed : int) -> None:
+        np.random.seed(seed)
+
         self.num_layers = num_layers
         self.layer_data = layer_data
 
@@ -40,9 +42,6 @@ class MADALINE :
             self.weight_mats.append(layer)
         
         # TODO: implement parameter calculation
-
-    def seed(self, seed: int) :
-        np.random.seed(seed)
 
     def fit(self, x_data : Union[pd.DataFrame, np.ndarray], y_data : Union[pd.DataFrame, np.ndarray], epochs : int, lr: int) :
         """
@@ -185,7 +184,7 @@ class MADALINE :
         return acc
 
 
-def create_madaline(topology : str) :
+def create_madaline(topology : str, seed : int) :
     """
     Method to parse topology of a network and return the madaline object
 
@@ -201,4 +200,4 @@ def create_madaline(topology : str) :
     
     layer_data = [int(token) for token in topology.split("-")]
 
-    return MADALINE(len(layer_data), layer_data)
+    return MADALINE(len(layer_data), layer_data, seed)

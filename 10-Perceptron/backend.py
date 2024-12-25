@@ -10,7 +10,8 @@ from typing import Union
 
 class Perceptron() :
     """Perceptron class"""
-    def __init__(self, num_inputs: int, weights: np.ndarray=None):
+    def __init__(self, num_inputs: int, seed : int, weights: np.ndarray=None):
+        np.random.seed(seed)
         self.num_inputs = num_inputs
         if weights is not None :
             if len(weights) != num_inputs + 1 :
@@ -106,10 +107,7 @@ class Perceptron() :
                     return
                 
         print("Max number of epochs reached. Stopping training!")
-        return
-
-    def seed(self, seed: int) :
-        np.random.seed(seed)  
+        return 
 
     def predict(self, X: Union[pd.DataFrame, pd.Series, np.ndarray]) -> int :
         """Method to predict test data"""
