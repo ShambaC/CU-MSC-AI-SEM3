@@ -15,11 +15,11 @@ class Perceptron() :
         self.num_inputs = num_inputs
         if weights is not None :
             if len(weights) != num_inputs + 1 :
-                self.weights = np.random.uniform(-0.5, 0.5, self.num_inputs+1)
+                self.weights = np.random.uniform(-1, 1, self.num_inputs+1)
             else :
                 self.weights = weights.ravel()
         else :
-            self.weights = np.random.uniform(-0.5, 0.5, self.num_inputs+1)
+            self.weights = np.random.uniform(-1, 1, self.num_inputs+1)
 
 
     def fit(self, X: Union[pd.DataFrame, np.ndarray], y: Union[pd.DataFrame, np.ndarray], epochs: int=20, lr: float=2e-2, thresh: float=1) -> None :
