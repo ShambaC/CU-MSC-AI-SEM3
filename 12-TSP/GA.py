@@ -17,6 +17,7 @@ import random
 
 from itertools import permutations
 from tqdm import tqdm, trange
+from pprint import pp
 
 def generate_population(num_cities: int, pop_size: int) -> list :
     """Method to generate the population for GA"""
@@ -35,6 +36,10 @@ def generate_encode_list(num_cities: int) -> dict :
     res = {}
     for i in range(1, num_cities+1) :
         res[i] = bin(i)[2:].zfill(pad)
+
+    print("Encoded cities: ")
+    pp(res)
+    print('\n')
 
     rev_dict = {v: k for k, v in res.items()}
     res.update(rev_dict)
@@ -195,11 +200,13 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
     print('\n' + '#'*30 + '\n')
     routes_dict = {k: v for k, v in sorted(routes_dict.items(), key=lambda item: item[1])}
     best_route = routes_dict.popitem()
-    distance = calc_fitness(best_route[0], distance_mat, encoding_dict, True)
-    print(f"Best route(encoded): {''.join(best_route[0])}, fitness: {distance}")
+    best_fitness = best_route[1]
+    best_distance = calc_fitness(best_route[0], distance_mat, encoding_dict, True)
+    print(f"Best route(encoded): {''.join(best_route[0])}, fitness: {best_fitness}")
     best_route = decode(best_route[0], encoding_dict)
-    print(f"Best route(decoded): {best_route}, fitness: {distance}")
+    print(f"Best route(decoded): {best_route}, distance: {best_distance}")
 
 
+# Sample run command: python GA.py -N 5 -P 10 -G 100 -M 0.3 -S 2024
 if __name__ == '__main__' :
     main()
