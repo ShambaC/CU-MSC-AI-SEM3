@@ -41,42 +41,39 @@ def generate_encode_list(num_cities: int) -> dict :
 
     return res
 
-def encode(route: tuple[int], encode_list: dict) -> str :
+def encode(route: tuple[int], encode_list: dict) -> tuple[str] :
     """Method to encode a route"""
 
-    res = ''
+    res = []
     for x in route :
-        res += encode_list[x]
+        res.append(encode_list[x])
 
-    return res
+    return tuple(res)
 
-def decode(route: str, encode_list: dict, num_cities: int) -> tuple[int] :
+def decode(route: tuple[str], encode_list: dict) -> tuple[int] :
     """Method to decode the route"""
 
-    encoding_size = len(route) / num_cities
-
     res = []
-    for i in range(0, len(route), encoding_size) :
-        city = encode_list[route[i : i + encoding_size]]
+    for x in route :
+        city = encode_list[x]
         res.append(city)
 
     return tuple(res)
 
-def calc_fitness(route: str, num_cities: int, distance_mat: np.ndarray, encode_list: dict) -> int :
+def calc_fitness(route: tuple[str], distance_mat: np.ndarray, encode_list: dict) -> int :
     """Calculate total distance of a route"""
 
     distance = 0
-    encode_size = len(route) / num_cities
     
-    for i in range(0, len(route)-encode_size, encode_size) :
-        city_A = encode_list[route[i:i+encode_size]]
-        city_B = encode_list[route[i+encode_size:i+(2*encode_size)]]
+    for i in range(len(route)-1) :
+        city_A = encode_list[route[i]] - 1
+        city_B = encode_list[route[i+1]] - 1
 
         distance += distance_mat[city_A][city_B]
 
     # Add distance for return trip
-    city_A = encode_list[route[0:encode_size]]
-    city_B = encode_list[route[-encode_size:]]
+    city_A = encode_list[route[0]] - 1
+    city_B = encode_list[route[-1]] - 1
     distance += distance_mat[city_A][city_B]
 
     return 1 / distance
@@ -86,35 +83,32 @@ def selection(routes: dict) -> np.ndarray :
 
     # Change fitness values to probabilities
     probabilities = [f / sum(routes.values()) for f in routes.values()]
-    parents = np.random.choice(routes.keys(), 2, p=probabilities)
+    parents_idx = np.random.choice(len(routes.keys()), 2, p=probabilities)
+    parents = [list(routes.keys())[i] for i in parents_idx]
 
     return parents
 
-def crossover(parentA: str, parentB: str, num_cities: int) -> tuple[str] :
+def crossover(parentA: tuple[str], parentB: tuple[str], num_cities: int) -> tuple[tuple[str]] :
     """Method to crossover two parents to produce two children"""
 
     # Single point crossover
-    encoding_size = len(parentA) / num_cities
-    point = np.random.randint(1, num_cities) * encoding_size
+    point = np.random.randint(1, num_cities)
 
     childA = parentA[:point] + parentB[point:]
     childB = parentB[:point] + parentA[point:]
 
     return (childA, childB)
 
-def mutation(child: str, num_cities: int) -> str :
+def mutation(child: tuple[str], num_cities: int) -> tuple[str] :
     """Method to mutate a child"""
 
-    encoding_size = len(child) / num_cities
-    pointA = np.random.randint(1, num_cities) * encoding_size
-    pointB = np.random.randint(1, num_cities) * encoding_size
+    pointA = np.random.randint(1, num_cities)
+    pointB = np.random.randint(1, num_cities)
 
     child_res = list(child)
-    child_res[pointA : pointA + encoding_size] = child[pointB : pointB + encoding_size]
-    child_res[pointB : pointB + encoding_size] = child[pointA : pointA + encoding_size]
-    child_res = ''.join(child_res)
+    child_res[pointA], child_res[pointB] = child[pointB], child[pointA]
 
-    return child_res
+    return tuple(child_res)
 
 
 @click.command()
@@ -142,12 +136,19 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
     routes_dict = {}
     for route in population :
         encoded_route = encode(route, encoding_dict)
-        fitness = calc_fitness(encoded_route, num, distance_mat, encoding_dict)
+        fitness = calc_fitness(encoded_route, distance_mat, encoding_dict)
         routes_dict[encoded_route] = fitness
 
     # Start generational loop
+    # Flag for low population check
+    flag = False
 
     for i in trange(gen_count, colour='green') :
+        # Check for low population
+        if len(routes_dict) == 1 :
+            flag = True
+            break
+
         # Select parents
         parentA, parentB = selection(routes_dict)
         #Crossover
@@ -159,8 +160,8 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
             childB = mutation(childB, num)
 
         # Calculate children fitness
-        child_A_fitness = calc_fitness(childA, num, distance_mat, encoding_dict)
-        child_B_fitness = calc_fitness(childB, num, distance_mat, encoding_dict)
+        child_A_fitness = calc_fitness(childA, distance_mat, encoding_dict)
+        child_B_fitness = calc_fitness(childB, distance_mat, encoding_dict)
 
         # Sort routes to find out routes with poorest fitness
         routes_dict = {k: v for k, v in sorted(routes_dict.items(), key=lambda item: item[1], reverse=True)}
@@ -172,12 +173,16 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
         routes_dict[childB] = child_B_fitness
 
     # Retrieve the route with highest fitness
+    if flag :
+        print("Population has become too low, cannot procreate anymore. ABORTING!")
+
     print('\n' + '#'*30 + '\n')
     routes_dict = {k: v for k, v in sorted(routes_dict.items(), key=lambda item: item[1])}
     best_route = routes_dict.popitem()
-    print(f"Best route(encoded): {best_route[0]}, distance: {best_route[1]}")
-    best_route = decode(best_route[0], encoding_dict, num)
-    print(f"Best route(decoded): {best_route}, distance: {best_route[1]}")
+    distance = best_route[1]
+    print(f"Best route(encoded): {''.join(best_route[0])}, fitness: {distance}")
+    best_route = decode(best_route[0], encoding_dict)
+    print(f"Best route(decoded): {best_route}, fitness: {distance}")
 
 
 if __name__ == '__main__' :
