@@ -60,7 +60,7 @@ def decode(route: tuple[str], encode_list: dict) -> tuple[int] :
 
     return tuple(res)
 
-def calc_fitness(route: tuple[str], distance_mat: np.ndarray, encode_list: dict) -> int :
+def calc_fitness(route: tuple[str], distance_mat: np.ndarray, encode_list: dict, is_distance: bool=False) -> int :
     """Calculate total distance of a route"""
 
     distance = 0
@@ -76,6 +76,9 @@ def calc_fitness(route: tuple[str], distance_mat: np.ndarray, encode_list: dict)
     city_B = encode_list[route[-1]] - 1
     distance += distance_mat[city_A][city_B]
 
+    if is_distance :
+        return distance
+
     return 1 / distance
 
 def selection(routes: dict) -> np.ndarray :
@@ -88,16 +91,33 @@ def selection(routes: dict) -> np.ndarray :
 
     return parents
 
-def crossover(parentA: tuple[str], parentB: tuple[str], num_cities: int) -> tuple[tuple[str]] :
-    """Method to crossover two parents to produce two children"""
+def crossover(parentA: tuple[str], parentB: tuple[str], num_cities: int) -> tuple[str] :
+    """Method to crossover two parents to produce two children
+    
+    Normal crossover in GA does not work for TSP as it could result in invalid routes.
+    Invalid routes include duplicate cities and/or missing cities.
+    This would result in a tour where only one or two city exists.
 
-    # Single point crossover
-    point = np.random.randint(1, num_cities)
+    Hence Ordered crossover(OX1) is used here. A subset of cities in parent 1 is chosen
+    and are copied to child 1 and the rest of the cities are copied from parent 2.
+    Vice versa happens for child 2.
 
-    childA = parentA[:point] + parentB[point:]
-    childB = parentB[:point] + parentA[point:]
+    Order Based Crossover(OX2/OBX) can also be used where random set of cities in either parent
+    are ordered as they appear in the other parent.
+    """
 
-    return (childA, childB)
+    # Get subset location
+    start, end = sorted(random.sample(range(num_cities), 2))
+    child = ['-1'] * num_cities
+    child[start:end] = parentA[start:end]
+
+    fill_position = [idx for idx, c in enumerate(child) if c == '-1']
+    fill_values = [c for c in parentB if c not in child]
+
+    for pos, value in zip(fill_position, fill_values) :
+        child[pos] = value
+    
+    return tuple(child)
 
 def mutation(child: tuple[str], num_cities: int) -> tuple[str] :
     """Method to mutate a child"""
@@ -127,6 +147,7 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
     # Make the matrix symmetirc
     distance_mat = ((distance_mat + distance_mat.T) / 2).astype(np.uint8)
     np.fill_diagonal(distance_mat, 0)
+    print(f"Distance Matrix:\n{distance_mat}\n")
 
     # Generate population
     population = generate_population(num, pop_size)
@@ -152,25 +173,20 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
         # Select parents
         parentA, parentB = selection(routes_dict)
         #Crossover
-        childA, childB = crossover(parentA, parentB, num)
+        child = crossover(parentA, parentB, num)
         # Mutation based on mutation probability
         if np.random.rand() < mut_prob :
-            childA = mutation(childA, num)
-        if np.random.rand() < mut_prob :
-            childB = mutation(childB, num)
+            child = mutation(child, num)
 
         # Calculate children fitness
-        child_A_fitness = calc_fitness(childA, distance_mat, encoding_dict)
-        child_B_fitness = calc_fitness(childB, distance_mat, encoding_dict)
+        child_fitness = calc_fitness(child, distance_mat, encoding_dict)
 
         # Sort routes to find out routes with poorest fitness
         routes_dict = {k: v for k, v in sorted(routes_dict.items(), key=lambda item: item[1], reverse=True)}
         routes_dict.popitem()
-        routes_dict.popitem()
 
         # Add children to population
-        routes_dict[childA] = child_A_fitness
-        routes_dict[childB] = child_B_fitness
+        routes_dict[child] = child_fitness
 
     # Retrieve the route with highest fitness
     if flag :
@@ -179,7 +195,7 @@ def main(num, pop_size, gen_count, mut_prob, seed) :
     print('\n' + '#'*30 + '\n')
     routes_dict = {k: v for k, v in sorted(routes_dict.items(), key=lambda item: item[1])}
     best_route = routes_dict.popitem()
-    distance = best_route[1]
+    distance = calc_fitness(best_route[0], distance_mat, encoding_dict, True)
     print(f"Best route(encoded): {''.join(best_route[0])}, fitness: {distance}")
     best_route = decode(best_route[0], encoding_dict)
     print(f"Best route(decoded): {best_route}, fitness: {distance}")
