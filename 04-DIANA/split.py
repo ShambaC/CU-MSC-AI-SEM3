@@ -113,7 +113,7 @@ class SplittingClustering(BaseEstimator, ClusterMixin):
         self._finished = False
         self._labels = np.empty(len(X))
         self._labels[:] = -1
-        self._strict_fit()
+        self._strict_fit(X)
         return self
 
     def fit_predict(self, X, y=None):
