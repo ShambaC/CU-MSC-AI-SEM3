@@ -1,13 +1,11 @@
-% Knowledge base
-
+% Facts
 man(marcus).
-pompeian(marcus).
+pompeian(marcus). 
 ruler(caesar).
+tries_to_assassinate(marcus, caesar).
 
+% Rules
 roman(X) :- pompeian(X).
-loyal(X, _) :- True.
-loyal(X, caesar) :- roman(X), not(hate(X, caesar)).
-hate(X, caesar) :- roman(X), not(loyal(X, caesar)).
-
-assassinate(X, Y) :- not(loyal(X, Y)), ruler(Y).
-assassinate(marcus, caesar).
+loyal_to_someone(X) :- roman(X).
+loyal_to_caesar(X) :- roman(X), \+ tries_to_assassinate(X, caesar).
+hate(X, caesar) :- \+ loyal_to_caesar(X).
