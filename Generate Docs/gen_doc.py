@@ -9,36 +9,38 @@ def create_assignment_docx():
     # Title (Centered and Bold)
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = title.add_run('Assignment 11')
+    run = title.add_run('Assignment 13')
     run.bold = True
     run.font.size = Pt(14)  # Adjust font size if needed
 
     # Problem Statement (Bold)
     doc.add_heading('Problem Statement:', level=1)
-    problem_statement = doc.add_paragraph('Apply MADALINE on the XOR gate with a topology of 2-2-1.')
+    problem_statement = doc.add_paragraph('Perform the Traveling Salesman Problem (TSP) using a Genetic Algorithm (GA).')
     problem_statement.runs[0].bold = True
 
     # Description
     doc.add_heading('Description:', level=1)
     doc.add_paragraph(
-        'MADALINE (Multiple ADAptive LINear Elements) is a neural network architecture that consists of multiple Adaline (Adaptive Linear Neuron) units. '
-        'It is used for solving non-linear classification problems, such as the XOR gate, which cannot be solved by a single-layer perceptron.'
+        'The Traveling Salesman Problem (TSP) is a classic optimization problem where the goal is to find the shortest possible route that visits a set of cities exactly once and returns to the starting city. '
+        'The Genetic Algorithm (GA) is a heuristic search algorithm inspired by the process of natural selection. It is used to find approximate solutions to optimization problems like TSP.'
     )
     doc.add_paragraph(
-        'In this assignment, MADALINE is applied to the XOR gate, which outputs 1 when the number of 1s in the input is odd and 0 otherwise. '
-        'The network topology is 2-2-1, meaning there are 2 input neurons, 2 hidden neurons, and 1 output neuron.'
+        'In this assignment, the GA is applied to solve the TSP. The algorithm involves creating a population of possible routes, encoding them, selecting the best routes based on fitness, and applying crossover and mutation to generate new routes. '
+        'The process is repeated for a specified number of generations to find the optimal or near-optimal route.'
     )
 
     # Algorithm (Numbered Steps with Bold "Step n:")
     doc.add_heading('Algorithm:', level=1)
     algorithm_steps = [
-        "Initialize the weights and biases of the MADALINE network randomly.",
-        "For each input-output pair in the training data, compute the output of each Adaline unit in the hidden layer.",
-        "Apply the activation function (e.g., step function) to the outputs of the hidden layer to determine the final output.",
-        "Compare the predicted output with the actual output and calculate the error.",
-        "Update the weights and biases of the Adaline units using the Least Mean Squares (LMS) learning rule.",
-        "Repeat the process for a specified number of epochs or until the network converges.",
-        "Evaluate the MADALINE network on the test data to measure its performance."
+        "Generate an initial population of random routes (permutations of cities).",
+        "Encode each route into a binary or integer representation for easier manipulation.",
+        "Calculate the fitness of each route based on the total distance traveled (shorter distances have higher fitness).",
+        "Select parent routes for reproduction using a weighted probability based on their fitness scores.",
+        "Perform crossover (e.g., Ordered Crossover) on the selected parents to produce offspring routes.",
+        "Apply mutation to the offspring routes to introduce genetic diversity.",
+        "Replace the least fit routes in the population with the new offspring routes.",
+        "Repeat the selection, crossover, mutation, and replacement steps for a specified number of generations.",
+        "Return the route with the highest fitness (shortest distance) as the solution."
     ]
 
     for i, step in enumerate(algorithm_steps, start=1):
@@ -51,29 +53,57 @@ def create_assignment_docx():
     doc.add_heading('Source Code:', level=1)
     source_code_stub = """
 import numpy as np
-import pandas as pd
+import click
+import random
 
-from backend import create_madaline
-from sklearn.model_selection import train_test_split
+from itertools import permutations
+from tqdm import tqdm, trange
+from pprint import pp
 
-# Load the XOR gate dataset
-X = pd.read_csv('3_XOR.csv')
-y = X.pop('output')
+def generate_population(num_cities: int, pop_size: int) -> list:
+    # Generate initial population of routes
+    ...
 
-# Prepare the training and testing data
-X_train = X[4:].drop('input_1', axis=1)
-X_test = X_train
-y_train = y[4:]
-y_test = y_train
+def generate_encode_list(num_cities: int) -> dict:
+    # Generate encoding for each city
+    ...
 
-# Create the MADALINE network with a 2-2-1 topology
-MADALINE = create_madaline("2-2-1", 2025)
+def encode(route: tuple[int], encode_list: dict) -> tuple[str]:
+    # Encode a route into binary or integer representation
+    ...
 
-# Train the MADALINE network
-MADALINE.fit(X_train, y_train, epochs=75, learning_rate=0.7869240351280281)
+def decode(route: tuple[str], encode_list: dict) -> tuple[int]:
+    # Decode a route back to city indices
+    ...
 
-# Evaluate the MADALINE network on the test data
-MADALINE.evaluate(X_test, y_test)
+def calc_fitness(route: tuple[str], distance_mat: np.ndarray, encode_list: dict, is_distance: bool=False) -> int:
+    # Calculate the fitness of a route based on total distance
+    ...
+
+def selection(routes: dict) -> np.ndarray:
+    # Select parents based on fitness scores
+    ...
+
+def crossover(parentA: tuple[str], parentB: tuple[str], num_cities: int) -> tuple[str]:
+    # Perform crossover to generate offspring routes
+    ...
+
+def mutation(child: tuple[str], num_cities: int) -> tuple[str]:
+    # Apply mutation to introduce genetic diversity
+    ...
+
+@click.command()
+@click.option('--num', '-N', default=5, help='Number of cities')
+@click.option('--pop_size', '-P', default=10, help='Population size')
+@click.option('--gen_count', '-G', default=50, help='Number of generations')
+@click.option('--mut_prob', '-M', default=0.2, help='Mutation probability')
+@click.option('--seed', '-S', default=42, help='Seed for RNG')
+def main(num, pop_size, gen_count, mut_prob, seed):
+    # Main function to run the Genetic Algorithm for TSP
+    ...
+
+if __name__ == '__main__':
+    main()
     """
 
     # Add the source code stub with monospace font and smaller font size
@@ -89,29 +119,29 @@ MADALINE.evaluate(X_test, y_test)
 
     # Report
     doc.add_heading('Report:', level=1)
-    doc.add_heading('Performance of MADALINE:', level=2)
+    doc.add_heading('Performance of Genetic Algorithm for TSP:', level=2)
     doc.add_paragraph(
-        '- MADALINE is effective for solving non-linear classification problems like the XOR gate.\n'
-        '- It uses multiple Adaline units to create a decision boundary that can separate non-linearly separable data.\n'
-        '- The algorithm has a time complexity of O(n^2) in the worst case, making it suitable for small to medium-sized datasets.'
+        '- The Genetic Algorithm (GA) is effective for solving the Traveling Salesman Problem (TSP) and other combinatorial optimization problems.\n'
+        '- It can find near-optimal solutions even for large problem sizes, although it may not guarantee the global optimum.\n'
+        '- The algorithm has a time complexity of O(n^2) per generation, making it suitable for medium-sized datasets.'
     )
 
-    doc.add_heading('Drawbacks of MADALINE:', level=2)
+    doc.add_heading('Drawbacks of Genetic Algorithm for TSP:', level=2)
     doc.add_paragraph(
-        '- Scalability: Due to its high time complexity, MADALINE is not suitable for very large datasets.\n'
-        '- Sensitivity to Initialization: The performance of the algorithm can be highly dependent on the initial weights and biases.\n'
-        '- Complexity: The architecture can become complex with more hidden layers and neurons, making it harder to train.'
+        '- Scalability: Due to its high time complexity, GA is not suitable for very large datasets.\n'
+        '- Sensitivity to Parameters: The performance of the algorithm can be highly dependent on parameters like population size, mutation rate, and crossover method.\n'
+        '- No Guarantee of Optimality: GA may converge to a local optimum rather than the global optimum.'
     )
 
     doc.add_heading('Remedies:', level=2)
     doc.add_paragraph(
-        '- For large datasets, consider using more scalable algorithms like multi-layer perceptrons (MLP) or convolutional neural networks (CNN).\n'
-        '- Experiment with different initialization methods to improve the performance of the MADALINE network.\n'
-        '- Use techniques like regularization or dropout to reduce overfitting and improve generalization.'
+        '- For large datasets, consider using more scalable algorithms like simulated annealing or ant colony optimization.\n'
+        '- Experiment with different parameter settings to improve the performance of the GA.\n'
+        '- Use techniques like elitism or hybrid approaches to improve convergence and solution quality.'
     )
 
     # Save the document
-    doc.save('Assignment_11_MADALINE.docx')
+    doc.save('Assignment_13_Genetic_Algorithm_TSP.docx')
 
 # Run the function to generate the document
 create_assignment_docx()
