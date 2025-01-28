@@ -89,7 +89,7 @@ class MLP :
             
         
         loss = 1.0
-        for epoch in range(1, epochs, 1) :
+        for epoch in range(1, epochs + 1, 1) :
             for row in trange(X.shape[0], ascii=" --", colour='green', desc=f'Epoch: {epoch}', postfix=f'Loss: {loss}') :
                 self.layers_data[0] = X[row].reshape((1, X.shape[1]))
 
